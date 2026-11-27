@@ -1,0 +1,39 @@
+FROM ubuntu:24.04@sha256:9a04f13b3f80ef056361e30868593b1cfd2279fe19e4081cb93a90bf56819d6a
+
+ARG RUST_VERSION=1.99.1
+ARG NODE_VERSION=24.22.0
+ARG PNPM_VERSION=12.11.2
+ARG AVM_VERSION=1.2.2
+ARG ANCHOR_VERSION=1.2.2
+ARG SOLANA_VERSION=4.1.2
+ARG PLATFORM_TOOLS_VERSION=v1.57
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    CARGO_HOME=/root/.cargo \
+    RUSTUP_HOME=/root/.rustup \
+    AVM_HOME=/root/.avm \
+    PATH=/root/.cargo/bin:/root/.avm/bin:/root/.local/share/solana/install/active_release/bin:/opt/node/bin:$PATH
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential ca-certificates curl git libssl-dev pkg-config xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION} \
+    && rustup component add rustfmt clippy --toolchain ${RUST_VERSION}
+
+RUN curl -fsSL https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz -o /tmp/node.tar.xz \
+    && mkdir -p /opt/node \
+    && tar -xJf /tmp/node.tar.xz --strip-components=1 -C /opt/node \
+    && rm /tmp/node.tar.xz \
+    && npm install --global pnpm@${PNPM_VERSION}
+
+RUN cargo install avm --git https://github.com/otter-sec/anchor --tag v${AVM_VERSION} --locked \
+    && avm install ${ANCHOR_VERSION} \
+    && avm use ${ANCHOR_VERSION} \
+    && avm solana install ${SOLANA_VERSION} \
+    && avm platform-tools install ${PLATFORM_TOOLS_VERSION}
+
+RUN cargo build-sbf --tools-version ${PLATFORM_TOOLS_VERSION} --install-only
+
+WORKDIR /workspace
+CMD ["/bin/bash"]

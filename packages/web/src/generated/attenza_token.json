@@ -1,0 +1,1029 @@
+{
+  "address": "46UFiREvpUgYEB4hgDzBR6n29Mh1BKBR9yp7VoEAapCo",
+  "metadata": {
+    "name": "attenza_token",
+    "version": "0.1.0",
+    "spec": "0.1.0"
+  },
+  "instructions": [
+    {
+      "name": "activate_vesting_schedule",
+      "discriminator": [203, 15, 249, 2, 34, 171, 253, 14],
+      "accounts": [
+        {
+          "name": "startup_authority",
+          "signer": true
+        },
+        {
+          "name": "startup_config"
+        },
+        {
+          "name": "vesting_schedule",
+          "writable": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_vested",
+      "discriminator": [208, 190, 166, 114, 203, 225, 140, 208],
+      "accounts": [
+        {
+          "name": "beneficiary",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "vesting_schedule",
+          "writable": true
+        },
+        {
+          "name": "escrow",
+          "writable": true
+        },
+        {
+          "name": "beneficiary_token_account",
+          "writable": true
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_allocation_vault",
+      "discriminator": [14, 38, 250, 75, 9, 154, 140, 32],
+      "accounts": [
+        {
+          "name": "startup_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "startup_config",
+          "writable": true
+        },
+        {
+          "name": "allocation_ledger",
+          "writable": true
+        },
+        {
+          "name": "vault_authority"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "vault",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "bucket",
+          "type": {
+            "defined": {
+              "name": "AllocationBucket"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_vesting_schedule",
+      "discriminator": [195, 30, 184, 253, 77, 154, 187, 66],
+      "accounts": [
+        {
+          "name": "startup_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "startup_config",
+          "writable": true
+        },
+        {
+          "name": "allocation_ledger",
+          "writable": true
+        },
+        {
+          "name": "vault_authority"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "locked_reserve_vault",
+          "writable": true
+        },
+        {
+          "name": "vesting_schedule",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [118, 101, 115, 116, 105, 110, 103]
+              },
+              {
+                "kind": "account",
+                "path": "startup_config"
+              },
+              {
+                "kind": "arg",
+                "path": "schedule_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "beneficiary"
+        },
+        {
+          "name": "escrow",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118, 101, 115, 116, 105, 110, 103, 45, 101, 115, 99, 114, 111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "startup_config"
+              },
+              {
+                "kind": "arg",
+                "path": "schedule_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "schedule_id",
+          "type": {
+            "array": ["u8", 32]
+          }
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "start_ts",
+          "type": "i64"
+        },
+        {
+          "name": "cliff_ts",
+          "type": "i64"
+        },
+        {
+          "name": "end_ts",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "finalize_startup",
+      "discriminator": [8, 46, 173, 0, 87, 129, 178, 89],
+      "accounts": [
+        {
+          "name": "startup_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "startup_config",
+          "writable": true
+        },
+        {
+          "name": "allocation_ledger",
+          "writable": true
+        },
+        {
+          "name": "mint_authority"
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "market_vault"
+        },
+        {
+          "name": "startup_reserve_vault"
+        },
+        {
+          "name": "community_reserve_vault"
+        },
+        {
+          "name": "locked_reserve_vault"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fund_allocations",
+      "discriminator": [150, 106, 124, 75, 134, 232, 63, 59],
+      "accounts": [
+        {
+          "name": "startup_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "startup_config",
+          "writable": true
+        },
+        {
+          "name": "allocation_ledger",
+          "writable": true
+        },
+        {
+          "name": "mint_authority"
+        },
+        {
+          "name": "mint",
+          "writable": true
+        },
+        {
+          "name": "market_vault",
+          "writable": true
+        },
+        {
+          "name": "startup_reserve_vault",
+          "writable": true
+        },
+        {
+          "name": "community_reserve_vault",
+          "writable": true
+        },
+        {
+          "name": "locked_reserve_vault",
+          "writable": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_startup",
+      "discriminator": [205, 176, 227, 193, 94, 24, 25, 40],
+      "accounts": [
+        {
+          "name": "startup_authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "startup_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 116, 97, 114, 116, 117, 112]
+              },
+              {
+                "kind": "account",
+                "path": "startup_authority"
+              },
+              {
+                "kind": "arg",
+                "path": "startup_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "allocation_ledger",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [97, 108, 108, 111, 99, 97, 116, 105, 111, 110]
+              },
+              {
+                "kind": "account",
+                "path": "startup_authority"
+              },
+              {
+                "kind": "arg",
+                "path": "startup_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109, 105, 110, 116, 45, 97, 117, 116, 104, 111, 114, 105, 116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "startup_authority"
+              },
+              {
+                "kind": "arg",
+                "path": "startup_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [109, 105, 110, 116]
+              },
+              {
+                "kind": "account",
+                "path": "startup_authority"
+              },
+              {
+                "kind": "arg",
+                "path": "startup_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "startup_id",
+          "type": {
+            "array": ["u8", 32]
+          }
+        },
+        {
+          "name": "total_supply",
+          "type": "u64"
+        },
+        {
+          "name": "decimals",
+          "type": "u8"
+        },
+        {
+          "name": "allocations",
+          "type": {
+            "defined": {
+              "name": "AllocationAmounts"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "AllocationLedger",
+      "discriminator": [53, 81, 62, 163, 68, 200, 187, 50]
+    },
+    {
+      "name": "StartupConfig",
+      "discriminator": [45, 52, 20, 4, 50, 98, 169, 82]
+    },
+    {
+      "name": "VestingSchedule",
+      "discriminator": [130, 200, 173, 148, 39, 75, 243, 147]
+    }
+  ],
+  "events": [
+    {
+      "name": "AllocationVaultCreated",
+      "discriminator": [211, 159, 42, 143, 25, 116, 249, 6]
+    },
+    {
+      "name": "AllocationsFunded",
+      "discriminator": [121, 218, 218, 42, 249, 90, 28, 161]
+    },
+    {
+      "name": "StartupTokenCreated",
+      "discriminator": [219, 61, 123, 167, 172, 65, 162, 138]
+    },
+    {
+      "name": "TokenInitializationFinalized",
+      "discriminator": [61, 230, 198, 176, 195, 230, 164, 255]
+    },
+    {
+      "name": "VestingClaimed",
+      "discriminator": [166, 62, 135, 158, 137, 1, 85, 15]
+    },
+    {
+      "name": "VestingScheduleActivated",
+      "discriminator": [157, 197, 89, 145, 189, 147, 168, 210]
+    },
+    {
+      "name": "VestingScheduleCreated",
+      "discriminator": [234, 207, 231, 98, 6, 142, 111, 165]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidSupply",
+      "msg": "Supply must be greater than zero."
+    },
+    {
+      "code": 6001,
+      "name": "InvalidDecimals",
+      "msg": "Decimals must be at most nine."
+    },
+    {
+      "code": 6002,
+      "name": "AllocationMismatch",
+      "msg": "Allocations must equal total supply exactly."
+    },
+    {
+      "code": 6003,
+      "name": "Arithmetic",
+      "msg": "Checked arithmetic failed."
+    },
+    {
+      "code": 6004,
+      "name": "InvalidState",
+      "msg": "Instruction is invalid in the current state."
+    },
+    {
+      "code": 6005,
+      "name": "VaultAlreadyCreated",
+      "msg": "Allocation vault already exists."
+    },
+    {
+      "code": 6006,
+      "name": "VaultsIncomplete",
+      "msg": "All four vaults must exist before funding."
+    },
+    {
+      "code": 6007,
+      "name": "MintStateInvalid",
+      "msg": "Mint authority or initial supply is invalid."
+    },
+    {
+      "code": 6008,
+      "name": "SupplyMismatch",
+      "msg": "Mint supply differs from declared supply."
+    },
+    {
+      "code": 6009,
+      "name": "VaultBalanceMismatch",
+      "msg": "Vault balance differs from allocation."
+    },
+    {
+      "code": 6010,
+      "name": "FreezeAuthorityPresent",
+      "msg": "Mint freeze authority must be absent."
+    },
+    {
+      "code": 6011,
+      "name": "InvalidSchedule",
+      "msg": "Vesting timestamps are invalid."
+    },
+    {
+      "code": 6012,
+      "name": "LockedReserveAssigned",
+      "msg": "Locked reserve has already been assigned."
+    },
+    {
+      "code": 6013,
+      "name": "ScheduleAlreadyActive",
+      "msg": "Schedule is already active."
+    },
+    {
+      "code": 6014,
+      "name": "ScheduleNotActive",
+      "msg": "Schedule is not active."
+    },
+    {
+      "code": 6015,
+      "name": "UnauthorizedBeneficiary",
+      "msg": "Only the beneficiary may claim."
+    },
+    {
+      "code": 6016,
+      "name": "NothingToClaim",
+      "msg": "No additional amount is vested."
+    },
+    {
+      "code": 6017,
+      "name": "Timestamp",
+      "msg": "Timestamp is outside the valid range."
+    }
+  ],
+  "types": [
+    {
+      "name": "AllocationAmounts",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "market_inventory",
+            "type": "u64"
+          },
+          {
+            "name": "startup_reserve",
+            "type": "u64"
+          },
+          {
+            "name": "community_reserve",
+            "type": "u64"
+          },
+          {
+            "name": "locked_reserve",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllocationBucket",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "MarketInventory"
+          },
+          {
+            "name": "StartupReserve"
+          },
+          {
+            "name": "CommunityReserve"
+          },
+          {
+            "name": "LockedReserve"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllocationLedger",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup",
+            "type": "pubkey"
+          },
+          {
+            "name": "created_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "allocations",
+            "type": {
+              "defined": {
+                "name": "AllocationAmounts"
+              }
+            }
+          },
+          {
+            "name": "vaults",
+            "type": {
+              "array": ["pubkey", 4]
+            }
+          },
+          {
+            "name": "vault_mask",
+            "type": "u8"
+          },
+          {
+            "name": "locked_amount_assigned",
+            "type": "u64"
+          },
+          {
+            "name": "finalized_at",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllocationVaultCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup",
+            "type": "pubkey"
+          },
+          {
+            "name": "bucket",
+            "type": {
+              "defined": {
+                "name": "AllocationBucket"
+              }
+            }
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AllocationsFunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LifecycleState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Created"
+          },
+          {
+            "name": "Funded"
+          },
+          {
+            "name": "Finalized"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StartupConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "LifecycleState"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "authority_bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "StartupTokenCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "startup",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenInitializationFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "startup",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "finalized_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VestingClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "schedule",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount_claimed",
+            "type": "u64"
+          },
+          {
+            "name": "cumulative_claimed",
+            "type": "u64"
+          },
+          {
+            "name": "remaining_locked",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VestingSchedule",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup",
+            "type": "pubkey"
+          },
+          {
+            "name": "startup_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "schedule_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_locked",
+            "type": "u64"
+          },
+          {
+            "name": "start_ts",
+            "type": "i64"
+          },
+          {
+            "name": "cliff_ts",
+            "type": "i64"
+          },
+          {
+            "name": "end_ts",
+            "type": "i64"
+          },
+          {
+            "name": "claimed",
+            "type": "u64"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VestingScheduleActivated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "schedule",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_locked",
+            "type": "u64"
+          },
+          {
+            "name": "start_ts",
+            "type": "i64"
+          },
+          {
+            "name": "cliff_ts",
+            "type": "i64"
+          },
+          {
+            "name": "end_ts",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VestingScheduleCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "startup_id",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "schedule",
+            "type": "pubkey"
+          },
+          {
+            "name": "beneficiary",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrow",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_locked",
+            "type": "u64"
+          },
+          {
+            "name": "start_ts",
+            "type": "i64"
+          },
+          {
+            "name": "cliff_ts",
+            "type": "i64"
+          },
+          {
+            "name": "end_ts",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}

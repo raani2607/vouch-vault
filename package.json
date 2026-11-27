@@ -1,0 +1,53 @@
+{
+  "name": "attenza",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Startup Attention Marketplace - Solana Devnet MVP",
+  "packageManager": "pnpm@12.11.2",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=12 <13"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @attenza/web dev",
+    "dev:devnet": "NEXT_PUBLIC_ATTENZA_CLUSTER=devnet pnpm --filter @attenza/web dev",
+    "dev:localnet": "NEXT_PUBLIC_ATTENZA_CLUSTER=localnet pnpm --filter @attenza/web dev",
+    "build": "pnpm --filter @attenza/chain-config build && pnpm --filter @attenza/web build",
+    "test": "pnpm --filter @attenza/chain-config test && pnpm --filter @attenza/web test",
+    "typecheck": "pnpm --filter @attenza/chain-config typecheck && pnpm --filter @attenza/web typecheck",
+    "lint": "pnpm --filter @attenza/chain-config lint && pnpm --filter @attenza/web lint",
+    "web:test": "pnpm --filter @attenza/web test",
+    "web:typecheck": "pnpm --filter @attenza/web typecheck",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "verify:env": "node scripts/verify-env.mjs",
+    "anchor:build": "anchor build --tools-version v1.57",
+    "rust:fmt:check": "cargo fmt --all -- --check",
+    "rust:lint": "cargo clippy --workspace --all-targets --locked",
+    "test:validator": "node scripts/test-local-validator.mjs",
+    "typecheck:tests": "tsc -p tsconfig.json",
+    "verify:m2": "./toolchain/run-verification.sh",
+    "idl:sync": "cp target/idl/attenza_token.json packages/web/src/generated/attenza_token.json && cp target/types/attenza_token.ts packages/web/src/generated/attenza_token.ts",
+    "idl:check": "node scripts/check-web-idl.mjs",
+    "devnet:preflight": "node scripts/devnet-preflight.mjs",
+    "devnet:deploy": "bash scripts/deploy-devnet.sh"
+  },
+  "devDependencies": {
+    "@anchor-lang/core": "1.2.2",
+    "@eslint/js": "^9.39.1",
+    "@solana/spl-token": "0.4.14",
+    "@solana/web3.js": "1.99.0",
+    "@types/chai": "5.2.3",
+    "@types/mocha": "10.0.10",
+    "@types/node": "24.10.0",
+    "chai": "5.2.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "mocha": "11.7.4",
+    "prettier": "^3.6.2",
+    "ts-mocha": "10.1.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.48.1",
+    "vitest": "^4.0.13"
+  }
+}
