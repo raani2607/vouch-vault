@@ -2,27 +2,35 @@ import { PublicKey } from "@solana/web3.js";
 import { BN } from "@anchor-lang/core";
 import {
   assertGenesisForCluster as assertClusterGenesis,
+  calculateTreasuryFeeSplit,
   DEVNET_GENESIS_HASH,
   DEVNET_RPC,
   explorerUrl,
   LOCALNET_RPC,
   parseSolanaPublicKey,
   rpcUrlForCluster as clusterRpcUrl,
-  type AttenzaCluster,
-} from "@attenza/chain-config";
+  type TreasuryFeeSplit,
+  type VouchVaultCluster,
+} from "@vouchvault/chain-config";
 
 export const PROGRAM_ID = new PublicKey(
-  "46UFiREvpUgYEB4hgDzBR6n29Mh1BKBR9yp7VoEAapCo",
+  "3RV7NRVSTabzrkuKywR3YNXazG8JSJcDo1v6BbD9Nwet",
 );
-export { DEVNET_GENESIS_HASH, DEVNET_RPC, LOCALNET_RPC };
-export const CLUSTER = process.env.NEXT_PUBLIC_ATTENZA_CLUSTER ?? "devnet";
+export {
+  calculateTreasuryFeeSplit,
+  DEVNET_GENESIS_HASH,
+  DEVNET_RPC,
+  LOCALNET_RPC,
+  type TreasuryFeeSplit,
+};
+export const CLUSTER = process.env.NEXT_PUBLIC_VOUCHVAULT_CLUSTER ?? "devnet";
 
 export function rpcUrlForCluster(cluster: string): string {
   try {
     return clusterRpcUrl(cluster);
   } catch {
     throw new Error(
-      "NEXT_PUBLIC_ATTENZA_CLUSTER must be explicitly set to devnet or localnet.",
+      "NEXT_PUBLIC_VOUCHVAULT_CLUSTER must be explicitly set to devnet or localnet.",
     );
   }
 }
@@ -31,13 +39,13 @@ export const RPC_URL = rpcUrlForCluster(CLUSTER);
 
 export const EXPLORER = (key: string, kind: "address" | "tx" = "address") => {
   requireSupportedCluster();
-  return explorerUrl(key, CLUSTER as AttenzaCluster, kind);
+  return explorerUrl(key, CLUSTER as VouchVaultCluster, kind);
 };
 
 export function requireSupportedCluster() {
   if (CLUSTER !== "devnet" && CLUSTER !== "localnet") {
     throw new Error(
-      "NEXT_PUBLIC_ATTENZA_CLUSTER must be explicitly set to devnet or localnet.",
+      "NEXT_PUBLIC_VOUCHVAULT_CLUSTER must be explicitly set to devnet or localnet.",
     );
   }
 }
@@ -57,7 +65,7 @@ export function assertGenesisForCluster(cluster: string, hash: string) {
   } catch (error) {
     if (cluster !== "devnet" && cluster !== "localnet") {
       throw new Error(
-        "NEXT_PUBLIC_ATTENZA_CLUSTER must be explicitly set to devnet or localnet.",
+        "NEXT_PUBLIC_VOUCHVAULT_CLUSTER must be explicitly set to devnet or localnet.",
       );
     }
     throw error;

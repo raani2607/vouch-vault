@@ -20,14 +20,14 @@ import {
   SYSVAR_CLOCK_PUBKEY,
   SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
-import type { AttenzaToken } from "../target/types/attenza_token.js";
+import type { VouchvaultToken } from "../target/types/vouchvault_token.js";
 
 const provider = AnchorProvider.env();
 setProvider(provider);
 const idl = JSON.parse(
-  readFileSync("target/idl/attenza_token.json", "utf8"),
+  readFileSync("target/idl/vouchvault_token.json", "utf8"),
 ) as Idl;
-const program = new Program<AttenzaToken>(idl as AttenzaToken, provider);
+const program = new Program<VouchvaultToken>(idl as VouchvaultToken, provider);
 const walletPath = process.env.ANCHOR_WALLET;
 assert.isString(
   walletPath,
@@ -88,7 +88,7 @@ async function currentBlockTime(): Promise<number> {
   return time as number;
 }
 
-describe("ATTENZA local validator token lifecycle", () => {
+describe("VouchVault local validator token lifecycle", () => {
   it("rejects invalid allocations without creating a startup or mint", async () => {
     const id = startupId(9);
     const startup = startupPda(id);

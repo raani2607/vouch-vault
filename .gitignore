@@ -15,4 +15,3 @@ deploy/*.keypair
 packages/web/.next/
 packages/web/next-env.d.ts
 packages/web/tsconfig.tsbuildinfo
-ATTENZA_PRD_v1.2.pdf

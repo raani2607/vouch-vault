@@ -785,7 +785,7 @@ export function VestingManager({
           </div>
         )}
         <p className="smallnote" style={{ marginTop: 12 }}>
-          Claims are beneficiary-only in M2. The connected wallet must match the
+          Claims are beneficiary-only. The connected wallet must match the
           recorded beneficiary; claims cannot redirect tokens.
         </p>
       </section>

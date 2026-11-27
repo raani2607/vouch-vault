@@ -6,7 +6,10 @@ solana_version = "4.1.2"
 skip-lint = false
 
 [programs.localnet]
-attenza_token = "46UFiREvpUgYEB4hgDzBR6n29Mh1BKBR9yp7VoEAapCo"
+vouchvault_token = "3RV7NRVSTabzrkuKywR3YNXazG8JSJcDo1v6BbD9Nwet"
+
+[programs.devnet]
+vouchvault_token = "3RV7NRVSTabzrkuKywR3YNXazG8JSJcDo1v6BbD9Nwet"
 
 [provider]
 cluster = "Localnet"

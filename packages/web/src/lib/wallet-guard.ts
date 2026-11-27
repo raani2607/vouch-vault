@@ -13,6 +13,6 @@ export function requireBeneficiaryWallet(
 ): PublicKey {
   const key = requireConnectedWallet(actual);
   if (!key.equals(beneficiary))
-    throw new Error("Only the recorded beneficiary can submit this M2 claim.");
+    throw new Error("Only the recorded beneficiary can submit this claim.");
   return key;
 }

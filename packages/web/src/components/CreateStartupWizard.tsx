@@ -212,7 +212,7 @@ export function CreateStartupWizard({
                 setName(e.target.value);
                 setStartupId("");
               }}
-              placeholder="e.g. Mavuno Technologies"
+              placeholder="e.g. Kibo Robotics"
               aria-invalid={Boolean(name) && !validName}
             />
             <small>
@@ -221,7 +221,7 @@ export function CreateStartupWizard({
                 : validName
                   ? "Looks good."
                   : "Use 2–64 characters."}{" "}
-              Saved in this browser only; M2 stores no on-chain name metadata.
+              Saved in this browser only; no on-chain name metadata is stored.
             </small>
           </div>
 

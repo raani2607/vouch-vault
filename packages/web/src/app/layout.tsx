@@ -4,9 +4,9 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "ATTENZA | Startup Attention Marketplace",
+  title: "VouchVault | Verifiable Growth Capital & Attention Treasuries",
   description:
-    "ATTENZA fixed-supply token lifecycle and vesting demonstration on Solana Devnet.",
+    "VouchVault fixed-supply token lifecycle, vesting, and deterministic growth treasury architecture on Solana.",
 };
 
 export default function RootLayout({

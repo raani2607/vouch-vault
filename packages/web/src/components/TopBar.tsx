@@ -23,10 +23,10 @@ export function TopBar({
     <header className="topbar">
       <div className="brand">
         <div className="brandmark" aria-hidden="true">
-          A
+          V
         </div>
         <div>
-          ATTENZA<small>STARTUP ATTENTION MARKETPLACE</small>
+          VOUCHVAULT<small>VERIFIABLE GROWTH CAPITAL</small>
         </div>
       </div>
       <div className="topright">

@@ -1,9 +1,9 @@
 import { PublicKey } from "@solana/web3.js";
 
-export type AttenzaCluster = "localnet" | "devnet";
+export type VouchVaultCluster = "localnet" | "devnet";
 
-export interface AttenzaChainConfig {
-  readonly cluster: AttenzaCluster;
+export interface VouchVaultChainConfig {
+  readonly cluster: VouchVaultCluster;
   readonly rpcUrl: URL;
   /** A syntactically valid public key; this does not prove an on-chain mint exists. */
   readonly quoteMint?: string | undefined;
@@ -14,20 +14,78 @@ export const DEVNET_RPC = "https://api.devnet.solana.com";
 export const DEVNET_GENESIS_HASH =
   "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
 
-export const DEFAULT_RPC_URLS: Record<AttenzaCluster, string> = {
+export const DEFAULT_RPC_URLS: Record<VouchVaultCluster, string> = {
   localnet: LOCALNET_RPC,
   devnet: DEVNET_RPC,
 };
 
+export const BPS_DENOMINATOR = 10_000n;
+export const TOTAL_FEE_BPS = 50n;
+export const LP_FEE_BPS = 30n;
+export const PROTOCOL_FEE_BPS = 20n;
+export const PCT_DENOMINATOR = 100n;
+export const GROWTH_TREASURY_PCT = 50n;
+export const PROTOCOL_RESERVE_PCT = 30n;
+export const RISK_OPS_PCT = 20n;
+
+export interface TreasuryFeeSplit {
+  readonly grossNotional: bigint;
+  readonly effectiveNetNotional: bigint;
+  readonly totalFee: bigint;
+  readonly lpFee: bigint;
+  readonly protocolFee: bigint;
+  readonly growthTreasury: bigint;
+  readonly protocolReserve: bigint;
+  readonly riskOpsBuffer: bigint;
+}
+
+/**
+ * Deterministic integer basis-point fee & Growth Treasury split calculation.
+ * Enforces floor rounding and exact remainder conservation:
+ * - totalFee = floor(Q * 50 / 10_000)
+ * - protocolFee = floor(Q * 20 / 10_000)
+ * - lpFee = totalFee - protocolFee
+ * - growthTreasury = floor(protocolFee * 50 / 100)
+ * - protocolReserve = floor(protocolFee * 30 / 100)
+ * - riskOpsBuffer = protocolFee - growthTreasury - protocolReserve
+ */
+export function calculateTreasuryFeeSplit(
+  grossNotional: bigint,
+): TreasuryFeeSplit {
+  if (grossNotional < 0n) {
+    throw new ConfigError("Gross notional must be a non-negative integer.");
+  }
+  const totalFee = (grossNotional * TOTAL_FEE_BPS) / BPS_DENOMINATOR;
+  const protocolFee = (grossNotional * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+  const lpFee = totalFee - protocolFee;
+  const effectiveNetNotional = grossNotional - totalFee;
+
+  const growthTreasury = (protocolFee * GROWTH_TREASURY_PCT) / PCT_DENOMINATOR;
+  const protocolReserve =
+    (protocolFee * PROTOCOL_RESERVE_PCT) / PCT_DENOMINATOR;
+  const riskOpsBuffer = protocolFee - growthTreasury - protocolReserve;
+
+  return {
+    grossNotional,
+    effectiveNetNotional,
+    totalFee,
+    lpFee,
+    protocolFee,
+    growthTreasury,
+    protocolReserve,
+    riskOpsBuffer,
+  };
+}
+
 export function rpcUrlForCluster(cluster: string): string {
   if (cluster === "devnet") return DEVNET_RPC;
   if (cluster === "localnet") return LOCALNET_RPC;
-  throw new ConfigError("ATTENZA_CLUSTER must be localnet or devnet.");
+  throw new ConfigError("VOUCHVAULT_CLUSTER must be localnet or devnet.");
 }
 
 export function assertGenesisForCluster(cluster: string, hash: string): void {
   if (cluster !== "devnet" && cluster !== "localnet") {
-    throw new ConfigError("ATTENZA_CLUSTER must be localnet or devnet.");
+    throw new ConfigError("VOUCHVAULT_CLUSTER must be localnet or devnet.");
   }
   if (cluster === "devnet" && hash !== DEVNET_GENESIS_HASH) {
     throw new ConfigError("RPC genesis hash does not match Solana Devnet.");
@@ -41,7 +99,7 @@ export function assertGenesisForCluster(cluster: string, hash: string): void {
 
 export function explorerUrl(
   key: string,
-  cluster: AttenzaCluster,
+  cluster: VouchVaultCluster,
   kind: "address" | "tx" = "address",
 ): string {
   if (cluster === "localnet") {
@@ -83,7 +141,7 @@ function parseRpcUrl(raw: string): URL {
   try {
     url = new URL(raw);
   } catch {
-    throw new ConfigError("ATTENZA_RPC_URL must be a valid URL.");
+    throw new ConfigError("VOUCHVAULT_RPC_URL must be a valid URL.");
   }
   if (
     url.username ||
@@ -133,7 +191,7 @@ function validatePublicKey(value: string): string {
     return key.toBase58();
   } catch {
     throw new ConfigError(
-      "ATTENZA_QUOTE_MINT must decode to a 32-byte Solana public key.",
+      "VOUCHVAULT_QUOTE_MINT must decode to a 32-byte Solana public key.",
     );
   }
 }
@@ -141,28 +199,30 @@ function validatePublicKey(value: string): string {
 /** Parse public, non-secret chain settings. This does not verify a quote mint on-chain. */
 export function parseChainConfig(
   env: Readonly<Record<string, string | undefined>>,
-): AttenzaChainConfig {
+): VouchVaultChainConfig {
   for (const alias of [
     ...UNSUPPORTED_RPC_ALIASES,
     ...UNSUPPORTED_CLUSTER_ALIASES,
   ]) {
     if (env[alias] !== undefined) {
       throw new ConfigError(
-        `${alias} is unsupported; use ATTENZA_CLUSTER and ATTENZA_RPC_URL.`,
+        `${alias} is unsupported; use VOUCHVAULT_CLUSTER and VOUCHVAULT_RPC_URL.`,
       );
     }
   }
 
-  const clusterValue = env.ATTENZA_CLUSTER ?? "localnet";
+  const clusterValue = env.VOUCHVAULT_CLUSTER ?? "localnet";
   if (clusterValue !== "localnet" && clusterValue !== "devnet") {
-    throw new ConfigError("ATTENZA_CLUSTER must be localnet or devnet.");
+    throw new ConfigError("VOUCHVAULT_CLUSTER must be localnet or devnet.");
   }
-  const cluster: AttenzaCluster = clusterValue;
-  const rpcUrl = parseRpcUrl(env.ATTENZA_RPC_URL ?? DEFAULT_RPC_URLS[cluster]);
+  const cluster: VouchVaultCluster = clusterValue;
+  const rpcUrl = parseRpcUrl(
+    env.VOUCHVAULT_RPC_URL ?? DEFAULT_RPC_URLS[cluster],
+  );
   if (cluster === "localnet") validateLocalnet(rpcUrl);
   else validateDevnet(rpcUrl);
 
-  const rawQuoteMint = env.ATTENZA_QUOTE_MINT?.trim();
+  const rawQuoteMint = env.VOUCHVAULT_QUOTE_MINT?.trim();
   const quoteMint = rawQuoteMint ? validatePublicKey(rawQuoteMint) : undefined;
   return { cluster, rpcUrl, quoteMint };
 }

@@ -6,11 +6,11 @@ use anchor_spl::token::{
     self, InitializeMint2, Mint, MintTo, SetAuthority, Token, TokenAccount, Transfer,
 };
 
-declare_id!("46UFiREvpUgYEB4hgDzBR6n29Mh1BKBR9yp7VoEAapCo");
+declare_id!("3RV7NRVSTabzrkuKywR3YNXazG8JSJcDo1v6BbD9Nwet");
 const VAULTS: u8 = 0b1111;
 
 #[program]
-pub mod attenza_token {
+pub mod vouchvault_token {
     use super::*;
 
     pub fn initialize_startup(
@@ -20,11 +20,11 @@ pub mod attenza_token {
         decimals: u8,
         allocations: AllocationAmounts,
     ) -> Result<()> {
-        require!(total_supply > 0, AttenzaError::InvalidSupply);
-        require!(decimals <= 9, AttenzaError::InvalidDecimals);
+        require!(total_supply > 0, VouchVaultError::InvalidSupply);
+        require!(decimals <= 9, VouchVaultError::InvalidDecimals);
         require!(
             allocations.sum()? == total_supply,
-            AttenzaError::AllocationMismatch
+            VouchVaultError::AllocationMismatch
         );
         let config = &mut ctx.accounts.startup_config;
         config.startup_id = startup_id;
@@ -72,13 +72,13 @@ pub mod attenza_token {
     ) -> Result<()> {
         require!(
             ctx.accounts.startup_config.state == LifecycleState::Created,
-            AttenzaError::InvalidState
+            VouchVaultError::InvalidState
         );
         let i = bucket.index();
         let bit = 1u8 << i;
         require!(
             ctx.accounts.allocation_ledger.vault_mask & bit == 0,
-            AttenzaError::VaultAlreadyCreated
+            VouchVaultError::VaultAlreadyCreated
         );
         ctx.accounts.allocation_ledger.vaults[i] = ctx.accounts.vault.key();
         ctx.accounts.allocation_ledger.vault_mask |= bit;
@@ -93,17 +93,17 @@ pub mod attenza_token {
     pub fn fund_allocations(ctx: Context<FundAllocations>) -> Result<()> {
         require!(
             ctx.accounts.startup_config.state == LifecycleState::Created,
-            AttenzaError::InvalidState
+            VouchVaultError::InvalidState
         );
         require!(
             ctx.accounts.allocation_ledger.vault_mask == VAULTS,
-            AttenzaError::VaultsIncomplete
+            VouchVaultError::VaultsIncomplete
         );
         require!(
             ctx.accounts.mint.supply == 0
                 && ctx.accounts.mint.mint_authority
                     == COption::Some(ctx.accounts.mint_authority.key()),
-            AttenzaError::MintStateInvalid
+            VouchVaultError::MintStateInvalid
         );
         let authority = ctx.accounts.startup_config.authority;
         let startup_id = ctx.accounts.startup_config.startup_id;
@@ -147,7 +147,7 @@ pub mod attenza_token {
         ctx.accounts.mint.reload()?;
         require!(
             ctx.accounts.mint.supply == ctx.accounts.allocation_ledger.total_supply,
-            AttenzaError::SupplyMismatch
+            VouchVaultError::SupplyMismatch
         );
         ctx.accounts.startup_config.state = LifecycleState::Funded;
         emit!(AllocationsFunded {
@@ -161,36 +161,36 @@ pub mod attenza_token {
     pub fn finalize_startup(ctx: Context<FinalizeStartup>) -> Result<()> {
         require!(
             ctx.accounts.startup_config.state == LifecycleState::Funded,
-            AttenzaError::InvalidState
+            VouchVaultError::InvalidState
         );
         let l = &ctx.accounts.allocation_ledger;
         require!(
             ctx.accounts.mint.supply == l.total_supply,
-            AttenzaError::SupplyMismatch
+            VouchVaultError::SupplyMismatch
         );
         require!(
             ctx.accounts.market_vault.amount == l.allocations.market_inventory,
-            AttenzaError::VaultBalanceMismatch
+            VouchVaultError::VaultBalanceMismatch
         );
         require!(
             ctx.accounts.startup_reserve_vault.amount == l.allocations.startup_reserve,
-            AttenzaError::VaultBalanceMismatch
+            VouchVaultError::VaultBalanceMismatch
         );
         require!(
             ctx.accounts.community_reserve_vault.amount == l.allocations.community_reserve,
-            AttenzaError::VaultBalanceMismatch
+            VouchVaultError::VaultBalanceMismatch
         );
         require!(
             ctx.accounts.locked_reserve_vault.amount == l.allocations.locked_reserve,
-            AttenzaError::VaultBalanceMismatch
+            VouchVaultError::VaultBalanceMismatch
         );
         require!(
             ctx.accounts.mint.freeze_authority.is_none(),
-            AttenzaError::FreezeAuthorityPresent
+            VouchVaultError::FreezeAuthorityPresent
         );
         require!(
             ctx.accounts.mint.mint_authority == COption::Some(ctx.accounts.mint_authority.key()),
-            AttenzaError::MintStateInvalid
+            VouchVaultError::MintStateInvalid
         );
         let authority = ctx.accounts.startup_config.authority;
         let startup_id = ctx.accounts.startup_config.startup_id;
@@ -231,22 +231,22 @@ pub mod attenza_token {
     ) -> Result<()> {
         require!(
             ctx.accounts.startup_config.state == LifecycleState::Finalized,
-            AttenzaError::InvalidState
+            VouchVaultError::InvalidState
         );
         require!(
             start_ts >= 0 && start_ts < end_ts && cliff_ts >= start_ts && cliff_ts <= end_ts,
-            AttenzaError::InvalidSchedule
+            VouchVaultError::InvalidSchedule
         );
-        require!(amount > 0, AttenzaError::InvalidSchedule);
+        require!(amount > 0, VouchVaultError::InvalidSchedule);
         let assigned = ctx
             .accounts
             .allocation_ledger
             .locked_amount_assigned
             .checked_add(amount)
-            .ok_or(AttenzaError::Arithmetic)?;
+            .ok_or(VouchVaultError::Arithmetic)?;
         require!(
             assigned <= ctx.accounts.allocation_ledger.allocations.locked_reserve,
-            AttenzaError::LockedReserveAssigned
+            VouchVaultError::LockedReserveAssigned
         );
         let config = ctx.accounts.startup_config.key();
         let authority = ctx.accounts.startup_config.authority;
@@ -297,11 +297,11 @@ pub mod attenza_token {
     pub fn activate_vesting_schedule(ctx: Context<ActivateVestingSchedule>) -> Result<()> {
         require!(
             !ctx.accounts.vesting_schedule.active,
-            AttenzaError::ScheduleAlreadyActive
+            VouchVaultError::ScheduleAlreadyActive
         );
         require!(
             ctx.accounts.vesting_schedule.total_locked > 0,
-            AttenzaError::InvalidSchedule
+            VouchVaultError::InvalidSchedule
         );
         ctx.accounts.vesting_schedule.active = true;
         let s = &ctx.accounts.vesting_schedule;
@@ -319,22 +319,22 @@ pub mod attenza_token {
 
     pub fn claim_vested(ctx: Context<ClaimVested>) -> Result<()> {
         let s = &mut ctx.accounts.vesting_schedule;
-        require!(s.active, AttenzaError::ScheduleNotActive);
+        require!(s.active, VouchVaultError::ScheduleNotActive);
         require_keys_eq!(
             ctx.accounts.beneficiary.key(),
             s.beneficiary,
-            AttenzaError::UnauthorizedBeneficiary
+            VouchVaultError::UnauthorizedBeneficiary
         );
         let vested = vested_amount(s, Clock::get()?.unix_timestamp)?;
         let amount = vested
             .checked_sub(s.claimed)
-            .ok_or(AttenzaError::Arithmetic)?;
-        require!(amount > 0, AttenzaError::NothingToClaim);
+            .ok_or(VouchVaultError::Arithmetic)?;
+        require!(amount > 0, VouchVaultError::NothingToClaim);
         let claimed = s
             .claimed
             .checked_add(amount)
-            .ok_or(AttenzaError::Arithmetic)?;
-        require!(claimed <= s.total_locked, AttenzaError::Arithmetic);
+            .ok_or(VouchVaultError::Arithmetic)?;
+        require!(claimed <= s.total_locked, VouchVaultError::Arithmetic);
         let startup = s.startup;
         let schedule_id = s.schedule_id;
         let bump = [s.bump];
@@ -362,7 +362,7 @@ pub mod attenza_token {
             remaining_locked: s
                 .total_locked
                 .checked_sub(claimed)
-                .ok_or(AttenzaError::Arithmetic)?,
+                .ok_or(VouchVaultError::Arithmetic)?,
             timestamp: now
         });
         Ok(())
@@ -372,7 +372,7 @@ pub mod attenza_token {
 fn vested_amount(s: &VestingSchedule, now: i64) -> Result<u64> {
     require!(
         s.start_ts >= 0 && s.start_ts < s.end_ts,
-        AttenzaError::InvalidSchedule
+        VouchVaultError::InvalidSchedule
     );
     if now < s.cliff_ts || now < s.start_ts {
         return Ok(0);
@@ -380,19 +380,19 @@ fn vested_amount(s: &VestingSchedule, now: i64) -> Result<u64> {
     if now >= s.end_ts {
         return Ok(s.total_locked);
     }
-    let elapsed = u128::try_from(now.checked_sub(s.start_ts).ok_or(AttenzaError::Timestamp)?)
-        .map_err(|_| error!(AttenzaError::Timestamp))?;
+    let elapsed = u128::try_from(now.checked_sub(s.start_ts).ok_or(VouchVaultError::Timestamp)?)
+        .map_err(|_| error!(VouchVaultError::Timestamp))?;
     let duration = u128::try_from(
         s.end_ts
             .checked_sub(s.start_ts)
-            .ok_or(AttenzaError::Timestamp)?,
+            .ok_or(VouchVaultError::Timestamp)?,
     )
-    .map_err(|_| error!(AttenzaError::Timestamp))?;
+    .map_err(|_| error!(VouchVaultError::Timestamp))?;
     let value = u128::from(s.total_locked)
         .checked_mul(elapsed)
-        .ok_or(AttenzaError::Arithmetic)?
+        .ok_or(VouchVaultError::Arithmetic)?
         / duration;
-    u64::try_from(value).map_err(|_| error!(AttenzaError::Arithmetic))
+    u64::try_from(value).map_err(|_| error!(VouchVaultError::Arithmetic))
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, Default, InitSpace)]
@@ -408,7 +408,7 @@ impl AllocationAmounts {
             .checked_add(self.startup_reserve)
             .and_then(|x| x.checked_add(self.community_reserve))
             .and_then(|x| x.checked_add(self.locked_reserve))
-            .ok_or_else(|| error!(AttenzaError::Arithmetic))
+            .ok_or_else(|| error!(VouchVaultError::Arithmetic))
     }
 }
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Copy, PartialEq, Eq, InitSpace)]
@@ -675,7 +675,7 @@ pub struct VestingClaimed {
 }
 
 #[error_code]
-pub enum AttenzaError {
+pub enum VouchVaultError {
     #[msg("Supply must be greater than zero.")]
     InvalidSupply,
     #[msg("Decimals must be at most nine.")]
@@ -751,5 +751,114 @@ mod vesting_math_tests {
     fn rejects_invalid_timestamp_ranges() {
         let invalid = schedule(10, 20, 15, 10);
         assert!(vested_amount(&invalid, 10).is_err());
+    }
+}
+
+/// Deterministic integer basis-point fee & Growth Treasury split specification.
+/// Mirrors `@vouchvault/chain-config`'s `calculateTreasuryFeeSplit` with exact
+/// checked `u128` arithmetic and remainder conservation.
+pub mod treasury_math {
+    use super::*;
+
+    pub const BPS_DENOMINATOR: u128 = 10_000;
+    pub const TOTAL_FEE_BPS: u128 = 50;
+    pub const PROTOCOL_FEE_BPS: u128 = 20;
+    pub const GROWTH_TREASURY_PCT: u128 = 50;
+    pub const PROTOCOL_RESERVE_PCT: u128 = 30;
+    pub const PCT_DENOMINATOR: u128 = 100;
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub struct FeeSplit {
+        pub gross_notional: u64,
+        pub effective_net_notional: u64,
+        pub total_fee: u64,
+        pub lp_fee: u64,
+        pub protocol_fee: u64,
+        pub growth_treasury: u64,
+        pub protocol_reserve: u64,
+        pub risk_ops_buffer: u64,
+    }
+
+    pub fn calculate_fee_split(gross_notional: u64) -> Result<FeeSplit> {
+        let q = u128::from(gross_notional);
+        let total_fee_u128 = q
+            .checked_mul(TOTAL_FEE_BPS)
+            .ok_or(VouchVaultError::Arithmetic)?
+            .checked_div(BPS_DENOMINATOR)
+            .ok_or(VouchVaultError::Arithmetic)?;
+        let protocol_fee_u128 = q
+            .checked_mul(PROTOCOL_FEE_BPS)
+            .ok_or(VouchVaultError::Arithmetic)?
+            .checked_div(BPS_DENOMINATOR)
+            .ok_or(VouchVaultError::Arithmetic)?;
+        let lp_fee_u128 = total_fee_u128
+            .checked_sub(protocol_fee_u128)
+            .ok_or(VouchVaultError::Arithmetic)?;
+        let net_u128 = q
+            .checked_sub(total_fee_u128)
+            .ok_or(VouchVaultError::Arithmetic)?;
+
+        let growth_u128 = protocol_fee_u128
+            .checked_mul(GROWTH_TREASURY_PCT)
+            .ok_or(VouchVaultError::Arithmetic)?
+            .checked_div(PCT_DENOMINATOR)
+            .ok_or(VouchVaultError::Arithmetic)?;
+        let reserve_u128 = protocol_fee_u128
+            .checked_mul(PROTOCOL_RESERVE_PCT)
+            .ok_or(VouchVaultError::Arithmetic)?
+            .checked_div(PCT_DENOMINATOR)
+            .ok_or(VouchVaultError::Arithmetic)?;
+        let risk_u128 = protocol_fee_u128
+            .checked_sub(growth_u128)
+            .and_then(|x| x.checked_sub(reserve_u128))
+            .ok_or(VouchVaultError::Arithmetic)?;
+
+        Ok(FeeSplit {
+            gross_notional,
+            effective_net_notional: u64::try_from(net_u128)
+                .map_err(|_| error!(VouchVaultError::Arithmetic))?,
+            total_fee: u64::try_from(total_fee_u128)
+                .map_err(|_| error!(VouchVaultError::Arithmetic))?,
+            lp_fee: u64::try_from(lp_fee_u128).map_err(|_| error!(VouchVaultError::Arithmetic))?,
+            protocol_fee: u64::try_from(protocol_fee_u128)
+                .map_err(|_| error!(VouchVaultError::Arithmetic))?,
+            growth_treasury: u64::try_from(growth_u128)
+                .map_err(|_| error!(VouchVaultError::Arithmetic))?,
+            protocol_reserve: u64::try_from(reserve_u128)
+                .map_err(|_| error!(VouchVaultError::Arithmetic))?,
+            risk_ops_buffer: u64::try_from(risk_u128)
+                .map_err(|_| error!(VouchVaultError::Arithmetic))?,
+        })
+    }
+}
+
+#[cfg(test)]
+mod treasury_math_tests {
+    use super::treasury_math::*;
+
+    #[test]
+    fn matches_worked_reference_vector_1000_usdc() {
+        let split = calculate_fee_split(1_000_000_000).unwrap();
+        assert_eq!(split.gross_notional, 1_000_000_000);
+        assert_eq!(split.effective_net_notional, 995_000_000);
+        assert_eq!(split.total_fee, 5_000_000);
+        assert_eq!(split.lp_fee, 3_000_000);
+        assert_eq!(split.protocol_fee, 2_000_000);
+        assert_eq!(split.growth_treasury, 1_000_000);
+        assert_eq!(split.protocol_reserve, 600_000);
+        assert_eq!(split.risk_ops_buffer, 400_000);
+    }
+
+    #[test]
+    fn conserves_remainders_across_edge_inputs() {
+        for q in [0_u64, 1, 199, 200, 500, 999, 12_345_678, u64::MAX] {
+            let s = calculate_fee_split(q).unwrap();
+            assert_eq!(s.effective_net_notional + s.total_fee, s.gross_notional);
+            assert_eq!(s.lp_fee + s.protocol_fee, s.total_fee);
+            assert_eq!(
+                s.growth_treasury + s.protocol_reserve + s.risk_ops_buffer,
+                s.protocol_fee
+            );
+        }
     }
 }

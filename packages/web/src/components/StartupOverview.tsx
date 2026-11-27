@@ -487,8 +487,8 @@ export function StartupOverview({
               })}
             </div>
             <div className="smallnote" style={{ marginTop: 12 }}>
-              Market inventory is reserved for a future market. No allocation is
-              deposited as active liquidity in M2.5.
+              Market inventory is isolated in a program-controlled PDA vault and
+              cannot be arbitrarily withdrawn by the founder authority.
             </div>
           </>
         )}

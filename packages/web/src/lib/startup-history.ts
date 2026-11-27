@@ -23,13 +23,13 @@ export type StartupTransactionRecord = {
 };
 
 /** Abstraction for transaction history providers (browser storage now;
- * reconcilable M5 indexer API projection in a future milestone). */
+ * optional reconcilable indexer projection). */
 export interface HistorySource {
   read(wallet: string, startupAddress: string): StartupTransactionRecord[];
   persist(wallet: string, record: StartupTransactionRecord): void;
 }
 
-const STORAGE_PREFIX = "attenza:startup-transactions:v1:";
+const STORAGE_PREFIX = "vouchvault:startup-transactions:v1:";
 const VALID_STATUSES = new Set<string>([
   "submitted",
   "confirmed",

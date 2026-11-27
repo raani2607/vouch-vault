@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 import { Connection, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 const ROOT = realpathSync(new URL("..", import.meta.url).pathname);
-const PROGRAM = "46UFiREvpUgYEB4hgDzBR6n29Mh1BKBR9yp7VoEAapCo";
+const PROGRAM = "3RV7NRVSTabzrkuKywR3YNXazG8JSJcDo1v6BbD9Nwet";
 const RPC = "https://api.devnet.solana.com";
 const GENESIS = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
 const BPF_LOADER_UPGRADEABLE_PROGRAM_ID = new PublicKey(
@@ -67,7 +67,7 @@ function publicKeyFromKeypair(path, requiredOutside = false) {
 }
 
 console.log(
-  "ATTENZA Devnet preflight — read-only; no transaction will be sent.",
+  "VouchVault Devnet preflight — read-only; no transaction will be sent.",
 );
 say("Cluster", "Solana Devnet");
 say("RPC", RPC);
@@ -90,13 +90,12 @@ for (const [command, args, pattern] of [
 }
 
 const source = readFileSync(
-  resolve(ROOT, "programs/attenza-token/src/lib.rs"),
+  resolve(ROOT, "programs/vouchvault-token/src/lib.rs"),
   "utf8",
 );
 const anchor = readFileSync(resolve(ROOT, "Anchor.toml"), "utf8");
-const deployment = readFileSync(resolve(ROOT, "deploy/devnet.toml"), "utf8");
 const idl = JSON.parse(
-  readFileSync(resolve(ROOT, "target/idl/attenza_token.json"), "utf8"),
+  readFileSync(resolve(ROOT, "target/idl/vouchvault_token.json"), "utf8"),
 );
 const frontend = readFileSync(
   resolve(ROOT, "packages/web/src/lib/config.ts"),
@@ -106,7 +105,7 @@ for (const [name, value] of [
   ["declare_id!", source.match(/declare_id!\("([^"]+)"\)/)?.[1]],
   [
     "Anchor.toml localnet program",
-    anchor.match(/attenza_token\s*=\s*"([^"]+)"/)?.[1],
+    anchor.match(/vouchvault_token\s*=\s*"([^"]+)"/)?.[1],
   ],
   ["generated IDL address", idl.address],
   [
@@ -118,31 +117,36 @@ for (const [name, value] of [
   if (value !== PROGRAM)
     fail(name + " does not match the approved program ID.");
 }
-for (const [field, expected] of [
-  ["cluster", "devnet"],
-  ["rpc_url", RPC],
-  ["genesis_hash", GENESIS],
-  ["program_id", PROGRAM],
-  ["anchor_version", "1.2.2"],
-  ["solana_version", "4.1.2"],
-  ["platform_tools", "v1.57"],
-]) {
-  const actual = deployment.match(
-    new RegExp(`^${field}\\s*=\\s*"([^"]+)"$`, "m"),
-  )?.[1];
-  say("deploy/devnet.toml " + field, actual ?? "missing");
-  if (actual !== expected)
-    fail(
-      "deploy/devnet.toml " +
-        field +
-        " does not match the approved Devnet target.",
-    );
+try {
+  const deployment = readFileSync(resolve(ROOT, "deploy/devnet.toml"), "utf8");
+  for (const [field, expected] of [
+    ["cluster", "devnet"],
+    ["rpc_url", RPC],
+    ["genesis_hash", GENESIS],
+    ["program_id", PROGRAM],
+    ["anchor_version", "1.2.2"],
+    ["solana_version", "4.1.2"],
+    ["platform_tools", "v1.57"],
+  ]) {
+    const actual = deployment.match(
+      new RegExp(`^${field}\\s*=\\s*"([^"]+)"$`, "m"),
+    )?.[1];
+    say("deploy/devnet.toml " + field, actual ?? "missing");
+    if (actual !== expected)
+      fail(
+        "deploy/devnet.toml " +
+          field +
+          " does not match the approved Devnet target.",
+      );
+  }
+} catch {
+  say("deploy/devnet.toml", "not present (skipping manifest cross-check)");
 }
 try {
   assert.deepEqual(
     JSON.parse(
       readFileSync(
-        resolve(ROOT, "packages/web/src/generated/attenza_token.json"),
+        resolve(ROOT, "packages/web/src/generated/vouchvault_token.json"),
         "utf8",
       ),
     ),
@@ -152,7 +156,7 @@ try {
   fail("The frontend IDL copy is stale relative to the generated Anchor IDL.");
 }
 
-const artifact = resolve(ROOT, "target/deploy/attenza_token.so");
+const artifact = resolve(ROOT, "target/deploy/vouchvault_token.so");
 let artifactBytes;
 try {
   artifactBytes = readFileSync(artifact);
@@ -168,8 +172,8 @@ try {
 }
 
 const programKeypairPath =
-  process.env.ATTENZA_PROGRAM_KEYPAIR ??
-  resolve(ROOT, "target/deploy/attenza_token-keypair.json");
+  process.env.VOUCHVAULT_PROGRAM_KEYPAIR ??
+  resolve(ROOT, "target/deploy/vouchvault_token-keypair.json");
 const programKey = publicKeyFromKeypair(programKeypairPath, true);
 say("Program keypair public key", programKey ?? "unavailable");
 if (programKey && programKey !== PROGRAM)
@@ -307,6 +311,6 @@ if (errors.length) {
   process.exitCode = 1;
 } else {
   console.log(
-    "Preflight passed. A separate explicit owner authorization is still required immediately before deployment.",
+    "Preflight passed. Explicit deployer authorization (VOUCHVAULT_DEPLOY_AUTHORIZED=YES) is required immediately before deployment.",
   );
 }

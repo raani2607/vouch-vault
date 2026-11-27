@@ -271,7 +271,7 @@ importers:
       "@anchor-lang/core":
         specifier: 1.2.2
         version: 1.2.2(bufferutil@4.2.0)(typescript@5.9.3)(utf-8-validate@6.1.0)
-      "@attenza/chain-config":
+      "@vouchvault/chain-config":
         specifier: workspace:*
         version: link:../chain-config
       "@solana/spl-token":

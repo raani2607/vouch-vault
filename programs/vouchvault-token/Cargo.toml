@@ -5,7 +5,7 @@ edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "vouchvault-token"
+name = "vouchvault_token"
 
 [features]
 no-entrypoint = []

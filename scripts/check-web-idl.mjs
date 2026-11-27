@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const idl = JSON.parse(readFileSync("target/idl/attenza_token.json", "utf8"));
+const idl = JSON.parse(readFileSync("target/idl/vouchvault_token.json", "utf8"));
 const shipped = JSON.parse(
-  readFileSync("packages/web/src/generated/attenza_token.json", "utf8"),
+  readFileSync("packages/web/src/generated/vouchvault_token.json", "utf8"),
 );
 assert.deepEqual(
   shipped,
   idl,
   "Web IDL copy is stale; run pnpm idl:sync after the pinned Anchor build.",
 );
-assert.equal(idl.address, "46UFiREvpUgYEB4hgDzBR6n29Mh1BKBR9yp7VoEAapCo");
+assert.equal(idl.address, "3RV7NRVSTabzrkuKywR3YNXazG8JSJcDo1v6BbD9Nwet");
 const instructions = new Set(idl.instructions.map(({ name }) => name));
 for (const name of [
   "initialize_startup",

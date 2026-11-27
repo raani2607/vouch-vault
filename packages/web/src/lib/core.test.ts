@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { PublicKey } from "@solana/web3.js";
-import idl from "../generated/attenza_token.json";
+import idl from "../generated/vouchvault_token.json";
 import {
   assertGenesisForCluster,
   allocate,
+  calculateTreasuryFeeSplit,
   calcVesting,
   CLUSTER,
   EXPLORER,
@@ -44,7 +45,7 @@ describe("Devnet and wallet guards", () => {
   it("accepts only the selected cluster fingerprint", () => {
     expect(rpcUrlForCluster("devnet")).toBe("https://api.devnet.solana.com");
     expect(rpcUrlForCluster("localnet")).toBe("http://127.0.0.1:8899");
-    expect(() => rpcUrlForCluster("mainnet-beta")).toThrow(/ATTENZA_CLUSTER/);
+    expect(() => rpcUrlForCluster("mainnet-beta")).toThrow(/VOUCHVAULT_CLUSTER/);
     expect(() =>
       assertGenesisForCluster(
         "devnet",
@@ -55,7 +56,7 @@ describe("Devnet and wallet guards", () => {
       /genesis hash/,
     );
     expect(() => assertGenesisForCluster("mainnet-beta", "anything")).toThrow(
-      /ATTENZA_CLUSTER/,
+      /VOUCHVAULT_CLUSTER/,
     );
     expect(CLUSTER).toBe("devnet");
     expect(EXPLORER("sig123", "tx")).toBe(
@@ -122,6 +123,18 @@ describe("Amounts, allocations, and vesting", () => {
     });
     expect(calcVesting(11n, 0n, 100n, 200n, 300n, 199n).claimable).toBe(0n);
     expect(calcVesting(11n, 0n, 100n, 200n, 300n, 300n).claimable).toBe(11n);
+  });
+  it("computes the exact 1,000.000000 USDC fee & growth treasury split", () => {
+    expect(calculateTreasuryFeeSplit(1_000_000_000n)).toEqual({
+      grossNotional: 1_000_000_000n,
+      effectiveNetNotional: 995_000_000n,
+      totalFee: 5_000_000n,
+      lpFee: 3_000_000n,
+      protocolFee: 2_000_000n,
+      growthTreasury: 1_000_000n,
+      protocolReserve: 600_000n,
+      riskOpsBuffer: 400_000n,
+    });
   });
 });
 
@@ -307,15 +320,15 @@ describe("Generated client and transaction state", () => {
       mint: startup.mint.toBase58(),
       vaults: startup.vaults.map((vault) => vault.toBase58()),
     }).toEqual({
-      startup: "7qCrihpxh6e4o1B8LY7hv4f4Q8UmYkWac5wGBmR5V4vC",
-      ledger: "BULyCcCqhRiSkiNsubYWKWhHqb13XBNN1EuXqfBmyifo",
-      mintAuthority: "9eMooq5zLN6Q82qocYzYEtUkYt3Zgt4NHkBLRMyuH4b",
-      mint: "AXnjAki5AHxxT5CeuCPfBbXsiic78tUTdmXPzd67BsT3",
+      startup: "6MWQg2kjGbbcg6bMDs6Hgmwmb7Z8ziansCM4JmwkkYYX",
+      ledger: "GCRv88sJyfhKfgERZnyXHycTZhXUXs2xWk9iRYAdZznq",
+      mintAuthority: "6sotdVYYR3QT5jfvQD9Vvt4epCRboWAxKC3oACCBvUUs",
+      mint: "4zzWDG89ZZ9jZ1SpBUEFYNDyK7HVxL2fuZNxC7eDfDrE",
       vaults: [
-        "2qsfvrDLLJ1482kNx2fABd3jmJW4nEaBZmbMRdfEBrGb",
-        "EQ5XEikYPCqk7hzYKUKMRTjmrop5uubnoBVLE24ybQVz",
-        "XgYFzMfQeKbhGLRspsWhWGiU2qoMkHyFGXtTu2wBiHM",
-        "Bt2p1PDW9hrWHpn5gUs3i5gjAtKi1bpvsfZx9yotcqZ1",
+        "2qzQpaoCZD5soB4DDhU16x1VseW7xg99XBKohh8MUh8T",
+        "9TFTpz5qmSiZL1p5RHraULxg9jf1UtCyWRmmmKRhfSRY",
+        "9iRxj4N7XFgp4BY9nKkMNrvmfdVzsmq98yQkdMxnjwKi",
+        "G6citcN9KrB5nsYNZaDiZZ3eiMGMr92j5UZuFPWigJ5t",
       ],
     });
     expect(new Set(startup.vaults.map((vault) => vault.toBase58())).size).toBe(
@@ -326,10 +339,10 @@ describe("Generated client and transaction state", () => {
       startupIdBytes("schedule-00000000000000000000000"),
     );
     expect(schedule.schedule.toBase58()).toBe(
-      "GujxpaAxSchRTrr5regYFTMmqwwnX467JkpVX3D1FNzD",
+      "6DJQ4tYQWtStkECmVeCsypPbcj4bBZQmnvcbpEx1Ze5e",
     );
     expect(schedule.escrow.toBase58()).toBe(
-      "E79MbiXmNJGbodxPVBTwWY3NASykprYAqDXqGRMNyxzB",
+      "BXcXWWioiCRwqujJ7fwmMeAMLU77BSykEWp2Ht6wyUxk",
     );
     expect(schedule.schedule).not.toEqual(startup.startup);
   });

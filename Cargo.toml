@@ -1,5 +1,5 @@
 [workspace]
-members = ["programs/attenza-token"]
+members = ["programs/vouchvault-token"]
 resolver = "2"
 
 [profile.release]

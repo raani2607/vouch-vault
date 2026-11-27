@@ -88,10 +88,10 @@ export function localStorageName(
   const keyAuthority = authority ?? item.config.authority.toBase58();
   return (
     localStorage.getItem(
-      `attenza:name:${keyAuthority}:${item.address.toBase58()}`,
+      `vouchvault:name:${keyAuthority}:${item.address.toBase58()}`,
     ) ??
     localStorage.getItem(
-      `attenza:name:${item.config.authority.toBase58()}:${item.address.toBase58()}`,
+      `vouchvault:name:${item.config.authority.toBase58()}:${item.address.toBase58()}`,
     ) ??
     ""
   );
@@ -105,7 +105,7 @@ export function saveLocalStartupName(
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(
-      `attenza:name:${authority}:${startupAddress}`,
+      `vouchvault:name:${authority}:${startupAddress}`,
       name.trim(),
     );
   } catch {

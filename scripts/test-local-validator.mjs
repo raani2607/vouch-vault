@@ -6,7 +6,7 @@ import { setTimeout as delay } from "node:timers/promises";
 
 const root = process.cwd();
 const rpcUrl = "http://127.0.0.1:8899";
-const tempRoot = await mkdtemp(join(tmpdir(), "attenza-local-validator-"));
+const tempRoot = await mkdtemp(join(tmpdir(), "vouchvault-local-validator-"));
 const ledger = join(tempRoot, "ledger");
 const payerPath = join(tempRoot, "localnet-payer.json");
 let validator;
@@ -34,12 +34,12 @@ try {
   const connection = new Connection(rpcUrl, "confirmed");
   const payer = Keypair.fromSecretKey(generatedPayer.secretKey);
   const programSource = await readFile(
-    join(root, "programs/attenza-token/src/lib.rs"),
+    join(root, "programs/vouchvault-token/src/lib.rs"),
     "utf8",
   );
   const programId = programSource.match(/declare_id!\("([^"]+)"\)/)?.[1];
   if (!programId) throw new Error("could not read the declared program ID");
-  const idlPath = join(root, "target/idl/attenza_token.json");
+  const idlPath = join(root, "target/idl/vouchvault_token.json");
   const idl = JSON.parse(await readFile(idlPath, "utf8"));
   idl.address = programId;
   await writeFile(idlPath, `${JSON.stringify(idl, null, 2)}\n`);
@@ -58,7 +58,7 @@ try {
       "--quiet",
       "--upgradeable-program",
       programId,
-      join(root, "target/deploy/attenza_token.so"),
+      join(root, "target/deploy/vouchvault_token.so"),
       payerPath,
     ],
     {
@@ -105,8 +105,8 @@ try {
   const localEnv = {
     ANCHOR_PROVIDER_URL: rpcUrl,
     ANCHOR_WALLET: payerPath,
-    ATTENZA_CLUSTER: "localnet",
-    ATTENZA_RPC_URL: rpcUrl,
+    VOUCHVAULT_CLUSTER: "localnet",
+    VOUCHVAULT_RPC_URL: rpcUrl,
   };
   run(
     "pnpm",

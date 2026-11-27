@@ -55,8 +55,9 @@ import {
   VestingManager,
   type VestingSubmitInput,
 } from "@/components/VestingManager";
+import { TreasurySimulator } from "@/components/TreasurySimulator";
 
-type View = "overview" | "create" | "vesting";
+type View = "overview" | "create" | "vesting" | "simulator";
 
 export default function Home() {
   const walletState = useWallet();
@@ -389,7 +390,7 @@ export default function Home() {
     const found = await fetchStartupByAddressOrMint(query);
     if (!found) {
       throw new Error(
-        "No ATTENZA startup found matching that Startup PDA or Mint address.",
+        "No VouchVault project found matching that Startup PDA or Mint address.",
       );
     }
     setDiscoveredStartups((prev) =>
@@ -509,23 +510,24 @@ export default function Home() {
 
       <section className="hero">
         <div>
-          <div className="eyebrow">M2.5 · Fixed supply, visible onchain</div>
+          <div className="eyebrow">Fixed supply · Auditable onchain</div>
           <h1>
-            Attention, accounted
+            Verifiable capital,
             <br />
-            for onchain.
+            accounted onchain.
           </h1>
           <p className="sub">
-            Create and inspect startup token allocations, then manage
-            beneficiary locked reserves through the ATTENZA lifecycle program.
+            Create and inspect fixed-supply token allocations, manage
+            beneficiary vesting escrows through the VouchVault program, and
+            simulate deterministic growth treasury fee splits.
           </p>
         </div>
         <div className="heroaside">
-          DEMO ENVIRONMENT
+          ZERO-BACKEND ARCHITECTURE
           <br />
           <span className="mono">Anchor · SPL Token · Solana</span>
           <br />
-          No swaps or market activity
+          Direct RPC &amp; Non-Custodial Signing
         </div>
       </section>
 
@@ -534,8 +536,9 @@ export default function Home() {
           {CLUSTER === "devnet" ? "DEVNET TEST ASSETS" : "LOCALNET DEVELOPMENT"}
         </strong>
         <span>
-          Tokens and SOL shown here have no monetary value. ATTENZA M2.5 does
-          not support buying, selling, swaps, or liquidity.
+          Tokens and SOL shown here have no monetary value. VouchVault Devnet
+          demonstrates fixed-supply lifecycle enforcement, vesting escrows, and
+          deterministic fee math.
         </span>
       </div>
 
@@ -549,20 +552,24 @@ export default function Home() {
       />
 
       <nav className="tabs" aria-label="Workspace views">
-        {(["overview", "create", "vesting"] as View[]).map((item) => (
-          <button
-            type="button"
-            key={item}
-            className={`tab ${view === item ? "active" : ""}`}
-            onClick={() => setView(item)}
-          >
-            {item === "overview"
-              ? "Overview"
-              : item === "create"
-                ? "Create startup token"
-                : "Vesting"}
-          </button>
-        ))}
+        {(["overview", "create", "vesting", "simulator"] as View[]).map(
+          (item) => (
+            <button
+              type="button"
+              key={item}
+              className={`tab ${view === item ? "active" : ""}`}
+              onClick={() => setView(item)}
+            >
+              {item === "overview"
+                ? "Overview"
+                : item === "create"
+                  ? "Create startup token"
+                  : item === "vesting"
+                    ? "Vesting"
+                    : "Treasury simulator"}
+            </button>
+          ),
+        )}
       </nav>
 
       <StatusBanner
@@ -637,11 +644,13 @@ export default function Home() {
         />
       )}
 
+      {view === "simulator" && <TreasurySimulator />}
+
       <footer className="footer">
         <div>
-          ATTENZA M2.5 ·{" "}
+          VouchVault ·{" "}
           {CLUSTER === "devnet" ? "Devnet demonstration" : "Localnet mode"} · no
-          financial value · no marketplace trading
+          financial value · zero off-chain custody
         </div>
         <div>
           Program{" "}

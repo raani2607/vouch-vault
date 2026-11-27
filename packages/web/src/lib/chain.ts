@@ -24,8 +24,8 @@ import {
   SYSVAR_RENT_PUBKEY,
   Transaction,
 } from "@solana/web3.js";
-import idl from "../generated/attenza_token.json";
-import type { AttenzaToken } from "../generated/attenza_token";
+import idl from "../generated/vouchvault_token.json";
+import type { VouchvaultToken } from "../generated/vouchvault_token";
 import {
   PROGRAM_ID,
   RPC_URL,
@@ -46,11 +46,11 @@ export const STARTUP_MINT_OFFSET = 72;
 export const VESTING_STARTUP_OFFSET = 8;
 export const VESTING_BENEFICIARY_OFFSET = 104;
 
-export type StartupConfigAccount = IdlAccounts<AttenzaToken>["startupConfig"];
+export type StartupConfigAccount = IdlAccounts<VouchvaultToken>["startupConfig"];
 export type AllocationLedgerAccount =
-  IdlAccounts<AttenzaToken>["allocationLedger"];
+  IdlAccounts<VouchvaultToken>["allocationLedger"];
 export type VestingScheduleAccount =
-  IdlAccounts<AttenzaToken>["vestingSchedule"];
+  IdlAccounts<VouchvaultToken>["vestingSchedule"];
 
 export type StartupData = {
   address: PublicKey;
@@ -98,8 +98,8 @@ const READONLY_WALLET = {
 } as unknown as Wallet;
 
 export const program = (wallet: Wallet) =>
-  new Program<AttenzaToken>(
-    idl as AttenzaToken,
+  new Program<VouchvaultToken>(
+    idl as VouchvaultToken,
     new AnchorProvider(connection, wallet, {
       commitment: "confirmed",
       preflightCommitment: "confirmed",
@@ -295,7 +295,7 @@ async function tx(
 }
 
 async function hydrateStartup(
-  client: Program<AttenzaToken>,
+  client: Program<VouchvaultToken>,
   address: PublicKey,
   config: StartupConfigAccount,
 ): Promise<StartupData> {
@@ -493,7 +493,7 @@ export type CreationInput = {
 
 async function runMissingLifecycleSteps(
   wallet: Wallet,
-  client: Program<AttenzaToken>,
+  client: Program<VouchvaultToken>,
   id: Uint8Array,
   addresses: ReturnType<typeof deriveStartup>,
   expected: {

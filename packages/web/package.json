@@ -1,5 +1,5 @@
 {
-  "name": "@attenza/web",
+  "name": "@vouchvault/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,13 +7,13 @@
     "dev": "next dev --webpack -p 3000",
     "build": "next build --webpack",
     "start": "next start -p 3000",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
+    "typecheck": "pnpm --filter @vouchvault/chain-config build && tsc --noEmit -p tsconfig.json",
+    "test": "pnpm --filter @vouchvault/chain-config build && vitest run",
     "lint": "eslint src"
   },
   "dependencies": {
     "@anchor-lang/core": "1.2.2",
-    "@attenza/chain-config": "workspace:*",
+    "@vouchvault/chain-config": "workspace:*",
     "@solana/spl-token": "0.4.14",
     "@solana/wallet-adapter-phantom": "^0.9.30",
     "@solana/wallet-adapter-react": "^0.15.40",

@@ -2,12 +2,12 @@
  * Program IDL in camelCase format in order to be used in JS/TS.
  *
  * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/attenza_token.json`.
+ * IDL can be found at `target/idl/vouchvault_token.json`.
  */
-export type AttenzaToken = {
-  address: "46UFiREvpUgYEB4hgDzBR6n29Mh1BKBR9yp7VoEAapCo";
+export type VouchvaultToken = {
+  address: "3RV7NRVSTabzrkuKywR3YNXazG8JSJcDo1v6BbD9Nwet";
   metadata: {
-    name: "attenzaToken";
+    name: "vouchvaultToken";
     version: "0.1.0";
     spec: "0.1.0";
   };

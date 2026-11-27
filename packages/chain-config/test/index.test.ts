@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { ConfigError, explorerUrl, parseChainConfig } from "../src/index.js";
+import {
+  calculateTreasuryFeeSplit,
+  ConfigError,
+  explorerUrl,
+  parseChainConfig,
+} from "../src/index.js";
 
 const VALID_MINT = "So11111111111111111111111111111111111111112";
 
@@ -14,16 +19,16 @@ describe("parseChainConfig", () => {
   });
 
   it("accepts a real 32-byte public key", () => {
-    expect(parseChainConfig({ ATTENZA_QUOTE_MINT: VALID_MINT }).quoteMint).toBe(
-      VALID_MINT,
-    );
+    expect(
+      parseChainConfig({ VOUCHVAULT_QUOTE_MINT: VALID_MINT }).quoteMint,
+    ).toBe(VALID_MINT);
   });
 
   it("accepts the canonical Devnet endpoint", () => {
     expect(
       parseChainConfig({
-        ATTENZA_CLUSTER: "devnet",
-        ATTENZA_QUOTE_MINT: VALID_MINT,
+        VOUCHVAULT_CLUSTER: "devnet",
+        VOUCHVAULT_QUOTE_MINT: VALID_MINT,
       }).rpcUrl.href,
     ).toBe("https://api.devnet.solana.com/");
   });
@@ -31,7 +36,7 @@ describe("parseChainConfig", () => {
   it.each(["mainnet-beta", "testnet", ""])(
     "rejects unsupported cluster %s",
     (cluster) => {
-      expect(() => parseChainConfig({ ATTENZA_CLUSTER: cluster })).toThrow(
+      expect(() => parseChainConfig({ VOUCHVAULT_CLUSTER: cluster })).toThrow(
         ConfigError,
       );
     },
@@ -50,7 +55,10 @@ describe("parseChainConfig", () => {
     "https://api.devnet.solana.com.evil.example",
   ])("rejects noncanonical remote endpoint %s", (url) => {
     expect(() =>
-      parseChainConfig({ ATTENZA_CLUSTER: "devnet", ATTENZA_RPC_URL: url }),
+      parseChainConfig({
+        VOUCHVAULT_CLUSTER: "devnet",
+        VOUCHVAULT_RPC_URL: url,
+      }),
     ).toThrow(ConfigError);
   });
 
@@ -67,7 +75,7 @@ describe("parseChainConfig", () => {
 
   it("retains local loopback endpoint support with an explicit local port", () => {
     expect(
-      parseChainConfig({ ATTENZA_RPC_URL: "http://localhost:9900" }).rpcUrl
+      parseChainConfig({ VOUCHVAULT_RPC_URL: "http://localhost:9900" }).rpcUrl
         .port,
     ).toBe("9900");
   });
@@ -80,7 +88,7 @@ describe("parseChainConfig", () => {
     "http://evil.localhost:8899",
     "file:///tmp/rpc",
   ])("rejects unsafe local endpoint %s", (url) => {
-    expect(() => parseChainConfig({ ATTENZA_RPC_URL: url })).toThrow(
+    expect(() => parseChainConfig({ VOUCHVAULT_RPC_URL: url })).toThrow(
       ConfigError,
     );
   });
@@ -88,16 +96,16 @@ describe("parseChainConfig", () => {
   it.each(["0OIl", "too-short", "1".repeat(44)])(
     "rejects invalid public keys %s",
     (quoteMint) => {
-      expect(() => parseChainConfig({ ATTENZA_QUOTE_MINT: quoteMint })).toThrow(
-        "32-byte Solana public key",
-      );
+      expect(() =>
+        parseChainConfig({ VOUCHVAULT_QUOTE_MINT: quoteMint }),
+      ).toThrow("32-byte Solana public key");
     },
   );
 
   it("does not claim that syntactic validation verifies a real mint account", () => {
-    expect(parseChainConfig({ ATTENZA_QUOTE_MINT: VALID_MINT }).quoteMint).toBe(
-      VALID_MINT,
-    );
+    expect(
+      parseChainConfig({ VOUCHVAULT_QUOTE_MINT: VALID_MINT }).quoteMint,
+    ).toBe(VALID_MINT);
   });
 
   it("generates cluster-aware Solana Explorer URLs for devnet and localnet", () => {
@@ -107,5 +115,46 @@ describe("parseChainConfig", () => {
     expect(explorerUrl("abc", "localnet", "address")).toBe(
       "https://explorer.solana.com/address/abc?cluster=custom&customUrl=http%3A%2F%2F127.0.0.1%3A8899",
     );
+  });
+});
+
+describe("calculateTreasuryFeeSplit", () => {
+  it("matches the 1,000.000000 USDC (1,000,000,000 base units) reference vector", () => {
+    expect(calculateTreasuryFeeSplit(1_000_000_000n)).toEqual({
+      grossNotional: 1_000_000_000n,
+      effectiveNetNotional: 995_000_000n,
+      totalFee: 5_000_000n,
+      lpFee: 3_000_000n,
+      protocolFee: 2_000_000n,
+      growthTreasury: 1_000_000n,
+      protocolReserve: 600_000n,
+      riskOpsBuffer: 400_000n,
+    });
+  });
+
+  it("conserves remainders exactly across odd and boundary base-unit inputs", () => {
+    for (const q of [
+      0n,
+      1n,
+      199n,
+      200n,
+      500n,
+      999n,
+      12_345_678n,
+      18_446_744_073_709_551_615n,
+    ]) {
+      const split = calculateTreasuryFeeSplit(q);
+      expect(split.effectiveNetNotional + split.totalFee).toBe(
+        split.grossNotional,
+      );
+      expect(split.lpFee + split.protocolFee).toBe(split.totalFee);
+      expect(
+        split.growthTreasury + split.protocolReserve + split.riskOpsBuffer,
+      ).toBe(split.protocolFee);
+    }
+  });
+
+  it("rejects negative gross notional inputs", () => {
+    expect(() => calculateTreasuryFeeSplit(-1n)).toThrow(ConfigError);
   });
 });
