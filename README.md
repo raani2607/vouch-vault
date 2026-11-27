@@ -1,6 +1,3 @@
-Below is the complete, raw Markdown for your new VouchVault repository README.md.
-It is engineered specifically for the 60% AI judge (explicit architectural invariants, deterministic math proofs, zero vaporware/unbuilt claims, exact state-machine transitions, security properties, and reproducible test commands) while giving the 40% local human judges an immediate, high-impact pitch in the opening paragraphs.
-(Note: Replace the <PLACEHOLDER> values in the Live Devnet Deployment table once you redeploy the renamed Anchor program and seed your fresh demo project on Devnet.)
 # VouchVault
 
 **Verifiable Growth Capital & Programmable Attention Treasuries on Solana.**
